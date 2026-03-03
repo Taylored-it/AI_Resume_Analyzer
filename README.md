@@ -1,4 +1,4 @@
-# 🤖 AI Resume Analyzer
+# AI Resume Analyzer
 
 An AI-powered resume analysis tool built with **Java Spring Boot** that extracts text from uploaded resumes (PDF/DOCX) and provides intelligent, structured feedback using the **OpenAI API**.
 
@@ -18,16 +18,16 @@ An AI-powered resume analysis tool built with **Java Spring Boot** that extracts
 
 ## Features
 
-- 📄 Upload PDF or DOCX resumes (up to 10MB)
-- 🔍 Automatic text extraction using **Apache PDFBox** and **Apache POI**
-- 🤖 AI-powered analysis via **OpenAI GPT-4o-mini**
-- ✅ Skills detection
-- 💡 Numbered, actionable improvement suggestions
-- 📋 Professional resume summary
-- 💾 All results stored in **MySQL** database
-- 🖨 Print-friendly results page
-- 🎨 Modern, responsive UI with loading spinner
-- ⚠️ Full error handling with user-friendly messages
+-  Upload PDF or DOCX resumes (up to 10MB)
+-  Automatic text extraction using **Apache PDFBox** and **Apache POI**
+-  AI-powered analysis via **OpenAI GPT-4o-mini**
+-  Skills detection
+-  Numbered, actionable improvement suggestions
+-  Professional resume summary
+-  All results stored in **MySQL** database
+-  Print-friendly results page
+-  Modern, responsive UI with loading spinner
+- Full error handling with user-friendly messages
 
 ---
 
