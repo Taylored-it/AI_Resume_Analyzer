@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results — AI Resume Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+            padding: 40px 20px 60px;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .page-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 16px;
+            padding: 28px 32px;
+            color: white;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .page-header h1 { font-size: 1.5rem; font-weight: 700; }
+        .file-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px 32px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+            animation: fadeUp 0.4s ease both;
+        }
+        .card:nth-child(2) { animation-delay: 0.1s; }
+        .card:nth-child(3) { animation-delay: 0.2s; }
+        .card:nth-child(4) { animation-delay: 0.3s; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .icon-purple { background: #ede9fe; }
+        .icon-green  { background: #dcfce7; }
+        .icon-amber  { background: #fef9c3; }
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .title-purple { color: #7c3aed; }
+        .title-green  { color: #16a34a; }
+        .title-amber  { color: #b45309; }
+
+        /* Summary */
+        .summary-text {
+            color: #374151;
+            line-height: 1.75;
+            font-size: 0.95rem;
+        }
+
+        /* Skills */
+        .skills-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .skill-tag {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background 0.15s;
+        }
+        .skill-tag:hover { background: #dcfce7; }
+        .no-data { color: #9ca3af; font-size: 0.9rem; font-style: italic; }
+
+        /* Suggestions */
+        .suggestions-list { list-style: none; }
+        .suggestions-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f9fafb;
+            color: #374151;
+            font-size: 0.93rem;
+            line-height: 1.6;
+        }
+        .suggestions-list li:last-child { border-bottom: none; padding-bottom: 0; }
+        .suggestion-num {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #fef3c7;
+            color: #b45309;
+            font-size: 0.72rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 13px 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 13px 24px;
+            background: white;
+            color: #374151;
+            text-decoration: none;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s, transform 0.1s;
+        }
+        .btn-outline:hover { border-color: #9ca3af; transform: translateY(-1px); }
+
+        @media print {
+            .actions { display: none; }
+            body { background: white; padding: 0; }
+            .card { box-shadow: none; border: 1px solid #e5e7eb; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Page header -->
+    <div class="page-header">
+        <div>
+            <h1>🤖 Resume Analysis Complete</h1>
+        </div>
+        <div class="file-badge">
+            📄 <span th:text="${fileName}">resume.pdf</span>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon icon-purple">📋</div>
+            <span class="card-title title-purple">Summary</span>
+        </div>
+        <p class="summary-text" th:text="${summary}">No summary available.</p>
+    </div>
+
+    <!-- Skills -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon icon-green">✅</div>
+            <span class="card-title title-green">Skills Detected</span>
+        </div>
+        <div class="skills-grid" th:if="${not #lists.isEmpty(skills)}">
+            <span class="skill-tag" th:each="skill : ${skills}" th:text="${skill}"></span>
+        </div>
+        <p class="no-data" th:if="${#lists.isEmpty(skills)}">No skills were identified.</p>
+    </div>
+
+    <!-- Suggestions -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon icon-amber">💡</div>
+            <span class="card-title title-amber">Improvement Suggestions</span>
+        </div>
+        <ul class="suggestions-list" th:if="${not #lists.isEmpty(suggestions)}">
+            <li th:each="suggestion, stat : ${suggestions}">
+                <span class="suggestion-num" th:text="${stat.count}">1</span>
+                <span th:text="${suggestion}"></span>
+            </li>
+        </ul>
+        <p class="no-data" th:if="${#lists.isEmpty(suggestions)}">No suggestions at this time.</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+        <a href="/" class="btn-primary">← Analyze Another Resume</a>
+        <button class="btn-outline" onclick="window.print()">🖨 Print Results</button>
+    </div>
+
+</div>
+</body>
+</html>

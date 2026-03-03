@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 48px 44px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .logo-icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 12px;
+        }
+        .logo h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1e1b4b;
+        }
+        .logo p {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 6px;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+        .step-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .step-arrow { color: #d1d5db; font-size: 0.7rem; }
+
+        .upload-zone {
+            border: 2px dashed #c4b5fd;
+            border-radius: 12px;
+            padding: 36px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #faf5ff;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .upload-zone:hover, .upload-zone.drag-over {
+            border-color: #7c3aed;
+            background: #ede9fe;
+        }
+        .upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .upload-icon { font-size: 2.5rem; margin-bottom: 12px; display: block; }
+        .upload-zone h3 { font-size: 1rem; font-weight: 600; color: #4c1d95; margin-bottom: 6px; }
+        .upload-zone p { font-size: 0.83rem; color: #7c3aed; }
+        .file-selected {
+            margin-top: 12px;
+            font-size: 0.82rem;
+            color: #059669;
+            font-weight: 600;
+            display: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn:hover { opacity: 0.92; transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+
+        .formats {
+            text-align: center;
+            font-size: 0.78rem;
+            color: #9ca3af;
+            margin-top: 14px;
+        }
+        .formats span { font-weight: 600; color: #6b7280; }
+
+        .error-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-top: 20px;
+            font-size: 0.88rem;
+            color: #dc2626;
+        }
+        .error-box .icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+        /* Loading overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(30, 27, 75, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+        .spinner {
+            width: 56px;
+            height: 56px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-overlay h2 { font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; }
+        .loading-overlay p { font-size: 0.9rem; opacity: 0.75; }
+
+        footer {
+            margin-top: 24px;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <h2>Analyzing your resume...</h2>
+    <p>This may take a few seconds</p>
+</div>
+
+<div class="card">
+    <div class="logo">
+        <span class="logo-icon">🤖</span>
+        <h1>AI Resume Analyzer</h1>
+        <p>Get instant AI-powered feedback on your resume</p>
+    </div>
+
+    <div class="steps">
+        <div class="step"><div class="step-dot">1</div> Upload</div>
+        <div class="step-arrow">›</div>
+        <div class="step"><div class="step-dot">2</div> Extract</div>
+        <div class="step-arrow">›</div>
+        <div class="step"><div class="step-dot">3</div> Analyze</div>
+        <div class="step-arrow">›</div>
+        <div class="step"><div class="step-dot">4</div> Results</div>
+    </div>
+
+    <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+        <div class="upload-zone" id="uploadZone">
+            <input type="file" id="fileInput" name="file" accept=".pdf,.docx" required>
+            <span class="upload-icon">📄</span>
+            <h3>Drop your resume here</h3>
+            <p>or click to browse files</p>
+            <div class="file-selected" id="fileSelected">✔ <span id="fileName"></span></div>
+        </div>
+
+        <button type="submit" class="btn" id="submitBtn">Analyze Resume →</button>
+
+        <p class="formats">Accepted: <span>PDF</span> and <span>DOCX</span> &nbsp;·&nbsp; Max: <span>10MB</span></p>
+    </form>
+
+    <div class="error-box" th:if="${error}">
+        <span class="icon">⚠️</span>
+        <span th:text="${error}"></span>
+    </div>
+</div>
+
+<footer>AI Resume Analyzer &copy; 2026 &nbsp;·&nbsp; Powered by OpenAI</footer>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const fileSelected = document.getElementById('fileSelected');
+    const fileNameEl = document.getElementById('fileName');
+    const uploadZone = document.getElementById('uploadZone');
+    const uploadForm = document.getElementById('uploadForm');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            fileNameEl.textContent = fileInput.files[0].name;
+            fileSelected.style.display = 'block';
+        }
+    });
+
+    uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('drag-over');
+    });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('drag-over');
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            fileNameEl.textContent = e.dataTransfer.files[0].name;
+            fileSelected.style.display = 'block';
+        }
+    });
+
+    uploadForm.addEventListener('submit', () => {
+        loadingOverlay.style.display = 'flex';
+    });
+</script>
+</body>
+</html>
