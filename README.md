@@ -1,6 +1,6 @@
 # 🤖 AI Resume Analyzer
 
-An AI-powered resume analysis tool built with **Java Spring Boot** that extracts text from uploaded resumes and provides intelligent feedback using the **OpenAI API**.
+An AI-powered resume analysis tool built with **Java Spring Boot** that extracts text from uploaded resumes (PDF/DOCX) and provides intelligent, structured feedback using the **OpenAI API**.
 
 ---
 
@@ -12,6 +12,8 @@ An AI-powered resume analysis tool built with **Java Spring Boot** that extracts
 ### Results Page
 ![Results Page](screenshots/results-page.png)
 
+> To add screenshots: run the app, visit `http://localhost:8080`, take screenshots, and save them as `screenshots/upload-page.png` and `screenshots/results-page.png`.
+
 ---
 
 ## Features
@@ -20,25 +22,26 @@ An AI-powered resume analysis tool built with **Java Spring Boot** that extracts
 - 🔍 Automatic text extraction using **Apache PDFBox** and **Apache POI**
 - 🤖 AI-powered analysis via **OpenAI GPT-4o-mini**
 - ✅ Skills detection
-- 💡 Actionable improvement suggestions
-- 📋 Professional summary of the resume
-- 💾 Results stored in **MySQL** database
+- 💡 Numbered, actionable improvement suggestions
+- 📋 Professional resume summary
+- 💾 All results stored in **MySQL** database
 - 🖨 Print-friendly results page
+- 🎨 Modern, responsive UI with loading spinner
 - ⚠️ Full error handling with user-friendly messages
 
 ---
 
 ## Tech Stack
 
-| Layer        | Technology                    |
-|--------------|-------------------------------|
-| Backend      | Java 17, Spring Boot 4.0      |
-| Template     | Thymeleaf                     |
-| Database     | MySQL + Spring Data JPA       |
-| PDF parsing  | Apache PDFBox 3.0             |
-| DOCX parsing | Apache POI 5.3                |
-| AI           | OpenAI API (GPT-4o-mini)      |
-| Build tool   | Maven                         |
+| Layer        | Technology                  |
+|--------------|-----------------------------|
+| Backend      | Java 17, Spring Boot 4.0    |
+| UI Templates | Thymeleaf                   |
+| Database     | MySQL 8 + Spring Data JPA   |
+| PDF parsing  | Apache PDFBox 3.0           |
+| DOCX parsing | Apache POI 5.3              |
+| AI           | OpenAI API (GPT-4o-mini)    |
+| Build tool   | Maven                       |
 
 ---
 
@@ -55,8 +58,8 @@ An AI-powered resume analysis tool built with **Java Spring Boot** that extracts
 
 ### 1. Clone the project
 ```bash
-git clone <your-repo-url>
-cd resume-analyzer
+git clone https://github.com/Taylored-it/AI_Resume_Analyzer.git
+cd AI_Resume_Analyzer
 ```
 
 ### 2. Create the MySQL database
@@ -64,10 +67,14 @@ cd resume-analyzer
 CREATE DATABASE resume_analyzer_db;
 ```
 
-### 3. Configure `application.properties`
-Edit `src/main/resources/application.properties`:
+### 3. Configure application.properties
+Copy the example file and fill in your credentials:
+```bash
+cp src/main/resources/application.properties.example src/main/resources/application.properties
+```
+Then edit `application.properties`:
 ```properties
-spring.datasource.username=root
+spring.datasource.username=your_mysql_username
 spring.datasource.password=your_mysql_password
 
 openai.api.key=sk-...your-openai-key...
@@ -87,13 +94,14 @@ http://localhost:8080
 
 ## API Endpoints
 
-| Method | Endpoint              | Description                        |
-|--------|-----------------------|------------------------------------|
-| GET    | `/`                   | Upload form (web UI)               |
-| POST   | `/upload`             | Upload resume and view results     |
-| POST   | `/api/upload-resume`  | REST API — returns JSON response   |
+| Method | Endpoint             | Description                      |
+|--------|----------------------|----------------------------------|
+| GET    | `/`                  | Upload form (web UI)             |
+| POST   | `/upload`            | Upload resume and view results   |
+| POST   | `/api/upload-resume` | REST API — returns JSON response |
 
-### REST API example (`POST /api/upload-resume`)
+### REST API Example
+
 ```bash
 curl -X POST http://localhost:8080/api/upload-resume \
   -F "file=@/path/to/resume.pdf"
@@ -115,55 +123,64 @@ curl -X POST http://localhost:8080/api/upload-resume \
 ## Project Structure
 
 ```
-src/main/java/com/karabo/resume_analyzer/
-├── controller/
-│   ├── PageController.java        # Thymeleaf web pages
-│   └── ResumeController.java      # REST API
-├── service/
-│   ├── ResumeService.java         # File upload + text extraction
-│   └── AIAnalysisService.java     # OpenAI integration
-├── entity/
-│   └── Resume.java                # JPA entity
-├── repository/
-│   └── ResumeRepository.java      # Database access
-└── exception/
-    ├── AIAnalysisException.java
-    ├── FileProcessingException.java
-    └── GlobalExceptionHandler.java
-
-src/main/resources/
-├── templates/
-│   ├── index.html                 # Upload page
-│   ├── result.html                # Results page
-│   └── error.html                 # Error page
-└── application.properties
+resume-analyzer/
+│
+├── src/main/java/com/karabo/resume_analyzer/
+│   ├── controller/
+│   │   ├── PageController.java          # Thymeleaf web pages (upload + results)
+│   │   └── ResumeController.java        # REST API endpoint
+│   │
+│   ├── service/
+│   │   ├── ResumeService.java           # File upload, storage & text extraction
+│   │   └── AIAnalysisService.java       # OpenAI API integration
+│   │
+│   ├── repository/
+│   │   └── ResumeRepository.java        # Database access (Spring Data JPA)
+│   │
+│   ├── model/
+│   │   └── Resume.java                  # JPA entity (resumes table)
+│   │
+│   ├── exception/
+│   │   ├── AIAnalysisException.java
+│   │   ├── FileProcessingException.java
+│   │   └── GlobalExceptionHandler.java  # Centralised error handling
+│   │
+│   └── ResumeAnalyzerApplication.java
+│
+├── src/main/resources/
+│   ├── templates/
+│   │   ├── index.html                   # Upload page
+│   │   ├── result.html                  # Analysis results page
+│   │   └── error.html                   # Error page
+│   │
+│   ├── application.properties           # ⚠️ Not committed — contains credentials
+│   └── application.properties.example  # ✅ Safe template to copy from
+│
+├── screenshots/                         # Add your screenshots here
+├── pom.xml
+└── README.md
 ```
 
 ---
 
 ## Error Handling
 
-| Scenario                      | Behaviour                                      |
-|-------------------------------|------------------------------------------------|
-| Invalid file type             | Error message shown on upload page             |
-| File exceeds 10MB             | Redirect with "File too large" message         |
-| Empty / unreadable file       | "Could not read file content" message          |
-| Invalid OpenAI API key        | "Invalid API key" message                      |
-| OpenAI rate limit hit         | "Rate limit reached, try again" message        |
-| OpenAI service down           | "Service temporarily unavailable" message      |
-| Unexpected server error       | Generic error page with status code            |
+| Scenario                  | Behaviour                                    |
+|---------------------------|----------------------------------------------|
+| Wrong file type           | Error message shown on upload page           |
+| File exceeds 10MB         | Redirect with "File too large" message       |
+| Empty / unreadable file   | "Could not read file content" message        |
+| Invalid OpenAI API key    | "Invalid API key" message                    |
+| OpenAI rate limit hit     | "Wait and try again" message                 |
+| OpenAI service down       | "Service temporarily unavailable" message    |
+| Unexpected server error   | Clean error page with HTTP status code       |
 
 ---
 
-## Adding Screenshots
+## Security
 
-After running the app, take screenshots of:
-1. The upload page (`http://localhost:8080`)
-2. The results page after uploading a resume
-
-Save them as:
-- `screenshots/upload-page.png`
-- `screenshots/results-page.png`
+`application.properties` is listed in `.gitignore` and will **never** be committed.
+Always use `application.properties.example` as the template and fill in your own credentials locally.
 
 ---
 
